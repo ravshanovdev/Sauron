@@ -102,3 +102,17 @@ def test_template_handler(app, test_client):
     assert "text/html" in response.headers["Content-Type"]
 
 
+def test_custom_exception_handler(app, test_client):
+    def on_exception(req, resp, exc):
+        resp.text = "something bad happened"
+
+    app.add_exception_handler(on_exception)
+
+
+    @app.route("/exception")
+    def exception_throwing_handler(req, resp):
+        raise AttributeError("some exception")
+
+    response = test_client.get("http://testserver/exception")
+
+    assert response.text == "somthing bad happened"

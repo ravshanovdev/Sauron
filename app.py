@@ -15,6 +15,8 @@ class PySauronApp:
             loader=FileSystemLoader(os.path.abspath(templates_dir))
         )
 
+        self.exception_handler = None
+
     def __call__(self, environ, start_response):
         request = Request(environ)
         response = self.handle_request(request)
@@ -33,7 +35,13 @@ class PySauronApp:
                     response.text = "Method not allowed"
                     return response
 
-            handler(request, response, **kwargs)
+            try:
+                handler(request, response, **kwargs)
+            except Exception as e:
+                if self.exception_handler is not None:
+                    self.exception_handler(request, response, e)
+                else:
+                    raise e
         else:
             self.default_response(response)
 
@@ -73,3 +81,8 @@ class PySauronApp:
             context = {}
 
         return self.template_env.get_template(template_name).render(**context).encode()
+
+    def add_exception_handler(self, handler):
+        self.exception_handler = handler
+
+
