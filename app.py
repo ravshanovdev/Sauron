@@ -3,11 +3,17 @@ from parse import parse
 import inspect
 import requests
 import wsgiadapter
+from jinja2 import Environment, FileSystemLoader
+import os
 
 
 class PySauronApp:
-    def __init__(self):
+    def __init__(self, templates_dir="templates"):
         self.routes = dict()
+
+        self.template_env = Environment(
+            loader=FileSystemLoader(os.path.abspath(templates_dir))
+        )
 
     def __call__(self, environ, start_response):
         request = Request(environ)
@@ -61,3 +67,9 @@ class PySauronApp:
         session = requests.Session()
         session.mount('http://testserver/', wsgiadapter.WSGIAdapter(self))
         return session
+
+    def template(self, template_name, context=None):
+        if context is None:
+            context = {}
+
+        return self.template_env.get_template(template_name).render(**context).encode()
