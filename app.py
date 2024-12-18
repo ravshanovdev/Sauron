@@ -36,20 +36,23 @@ class PySauronApp:
     def find_handler(self, request):
         for path, handler in self.routes.items():
             parsed_result = parse(path, request.path)
-
             if parsed_result is not None:
                 return handler, parsed_result.named
+
         return None, None
 
     def default_response(self, response):
         response.status_code = 404
         response.text = 'Not Found'
 
-    def route(self, path):
+    def add_route(self, path, handler):
         assert path not in self.routes, "Duplicate Rout. Please Change The URL"
+        self.routes[path] = handler
+        return handler
 
+    def route(self, path):
         def wrapper(handler):
-            self.routes[path] = handler
+            self.add_route(path, handler)
             return handler
 
         return wrapper
@@ -58,4 +61,3 @@ class PySauronApp:
         session = requests.Session()
         session.mount('http://testserver/', wsgiadapter.WSGIAdapter(self))
         return session
-        
