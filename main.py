@@ -1,5 +1,5 @@
 from app import PySauronApp
-
+from middleware import Middleware
 app = PySauronApp()
 
 
@@ -57,3 +57,12 @@ def exception_throwing_handler(req, resp):
     raise AttributeError("some exception")
 
 
+class LoggingMiddleware(Middleware):
+    def process_request(self, req):
+        print("request is being called", req.url)
+
+    def process_response(self, req, resp):
+        print("response has been generated", req.url)
+
+
+app.add_middleware(LoggingMiddleware)

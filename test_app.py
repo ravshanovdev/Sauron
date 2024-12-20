@@ -1,5 +1,6 @@
 from app import PySauronApp
 import pytest
+from middleware import Middleware
 
 
 def test_basic_rout_adding(app):
@@ -122,6 +123,41 @@ def test_non_existent_static_files(test_client):
 
 
 def test_serving_static_file(test_client):
-    response = test_client.get("http://testserver/test.css")
+    response = test_client.get("http://testserver/static/test.css")
 
     assert response.text == "body {background-color: lightblue;}"
+
+
+def test_middleware(app, test_client):
+    process_request_called = False
+    process_response_called = False
+
+    class SimpleMiddleWare(Middleware):
+        def __init__(self, app):
+            super().__init__(app)
+
+        def process_request(self, req):
+            nonlocal process_request_called
+            process_request_called = True
+
+        def process_response(self, req, resp):
+            nonlocal process_response_called
+            process_response_called = True
+
+    app.add_middleware(SimpleMiddleWare)
+
+    @app.route("/home")
+    def index(req, resp):
+        resp.text = "from handler"
+
+    test_client.get("http://testserver/home")
+
+    assert process_request_called is True
+    assert process_response_called is True
+
+
+
+
+
+
+
