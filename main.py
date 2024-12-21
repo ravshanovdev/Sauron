@@ -3,7 +3,7 @@ from middleware import Middleware
 app = PySauronApp()
 
 
-@app.route("/home")
+@app.route("/home", allowed_methods=["get"])
 def home(request, response):
     response.text = "hi this is home page"
 

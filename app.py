@@ -37,15 +37,20 @@ class PySauronApp:
     def handle_request(self, request):
         response = Response()
 
-        handler, kwargs = self.find_handler(request)
-        if handler is not None:
+        handler_data, kwargs = self.find_handler(request)
+        if handler_data is not None:
+            handler = handler_data["handler"]
+            allowed_methods = handler_data["allowed_methods"]
+
             if inspect.isclass(handler):
                 handler = getattr(handler(), request.method.lower(), None)
 
                 if handler is None:
-                    response.status_code = 405
-                    response.text = "Method not allowed"
-                    return response
+                    return self.method_not_allowed_response(response)
+
+            else:
+                if request.method.lower() not in allowed_methods:
+                    return self.method_not_allowed_response(response)
 
             try:
                 handler(request, response, **kwargs)
@@ -59,11 +64,16 @@ class PySauronApp:
 
         return response
 
+    def method_not_allowed_response(self, response):
+        response.status_code = 405
+        response.text = "Method not allowed"
+        return response
+
     def find_handler(self, request):
-        for path, handler in self.routes.items():
+        for path, handler_data in self.routes.items():
             parsed_result = parse(path, request.path)
             if parsed_result is not None:
-                return handler, parsed_result.named
+                return handler_data, parsed_result.named
 
         return None, None
 
@@ -71,14 +81,18 @@ class PySauronApp:
         response.status_code = 404
         response.text = 'Not Found'
 
-    def add_route(self, path, handler):
+    def add_route(self, path, handler, allowed_methods=None):
         assert path not in self.routes, "Duplicate Rout. Please Change The URL"
-        self.routes[path] = handler
+
+        if allowed_methods is None:
+            allowed_methods = ["post", "put", "patch", "options", "delete", "get", "head", "connect", "trace"]
+
+        self.routes[path] = {"handler": handler, "allowed_methods": allowed_methods}
         return handler
 
-    def route(self, path):
+    def route(self, path, allowed_methods=None):
         def wrapper(handler):
-            self.add_route(path, handler)
+            self.add_route(path, handler, allowed_methods)
             return handler
 
         return wrapper
@@ -99,4 +113,3 @@ class PySauronApp:
 
     def add_middleware(self, middleware_cls):
         self.middleware.add(middleware_cls)
-
