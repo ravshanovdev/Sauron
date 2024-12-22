@@ -1,4 +1,5 @@
-from webob import Request, Response
+from webob import Request
+from response import Response
 from parse import parse
 import inspect
 import requests
@@ -106,7 +107,7 @@ class PySauronApp:
         if context is None:
             context = {}
 
-        return self.template_env.get_template(template_name).render(**context).encode()
+        return self.template_env.get_template(template_name).render(**context)
 
     def add_exception_handler(self, handler):
         self.exception_handler = handler

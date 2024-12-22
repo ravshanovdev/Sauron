@@ -1,7 +1,7 @@
 from app import PySauronApp
 from middleware import Middleware
 app = PySauronApp()
-
+import json
 
 @app.route("/home", allowed_methods=["get"])
 def home(request, response):
@@ -66,3 +66,9 @@ class LoggingMiddleware(Middleware):
 
 
 app.add_middleware(LoggingMiddleware)
+
+
+@app.route("/json")
+def json_handler(req, resp):
+    response_data = {"name": "asasa"}
+    resp.json = response_data
