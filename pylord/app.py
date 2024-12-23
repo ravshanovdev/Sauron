@@ -1,5 +1,5 @@
 from webob import Request
-from response import Response
+from .response import Response
 from parse import parse
 import inspect
 import requests
@@ -7,10 +7,10 @@ import wsgiadapter
 from jinja2 import Environment, FileSystemLoader
 import os
 from whitenoise import WhiteNoise
-from middleware import Middleware
+from .middleware import Middleware
 
 
-class PySauronApp:
+class PyLordApp:
     def __init__(self, templates_dir="templates", static_dir="static"):
         self.routes = dict()
 

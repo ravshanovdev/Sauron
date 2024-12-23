@@ -1,10 +1,10 @@
-from app import PySauronApp
+from pylord.app import PyLordApp
 import pytest
 
 
 @pytest.fixture
 def app():
-    return PySauronApp()
+    return PyLordApp()
 
 
 @pytest.fixture

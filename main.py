@@ -1,7 +1,7 @@
-from app import PySauronApp
-from middleware import Middleware
-app = PySauronApp()
-import json
+from pylord.app import PyLordApp
+from pylord.middleware import Middleware
+app = PyLordApp()
+
 
 @app.route("/home", allowed_methods=["get"])
 def home(request, response):

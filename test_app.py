@@ -1,6 +1,5 @@
-from app import PySauronApp
 import pytest
-from middleware import Middleware
+from pylord.middleware import Middleware
 
 
 def test_basic_rout_adding(app):
@@ -170,13 +169,13 @@ def test_allowed_method_for_function_based_handlers(app, test_client):
 def test_json_response_helper(app, test_client):
     @app.route("/json")
     def json_handler(req, resp):
-        resp.json = {"name": "pysauron"}
+        resp.json = {"name": "pylord"}
 
     resp = test_client.get("http://testserver/json")
     resp_data = resp.json()
 
     assert resp.headers["Content-Type"] == "application/json"
-    assert resp_data["name"] == "pysauron"
+    assert resp_data["name"] == "pylord"
 
 
 def test_text_response_handler(app, test_client):
