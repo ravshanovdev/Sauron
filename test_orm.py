@@ -52,9 +52,19 @@ def test_create_tables(Author, Book, db):
     db.create(Author)
     db.create(Book)
 
-    assert Author._get_create_sql() == "CREATE TABLE IF NOT EXIST author (id INTEGER PRIMARY KEY AUTOINCREMENT, age INTEGER, name TEXT);"
-    assert Book._get_create_sql() == "CREATE TABLE IF NOT EXIST book (id INTEGER PRIMARY KEY AUTOINCREMENT, author_id INTEGER, published INTEGER, title TEXT);"
+    assert Author._get_create_sql() == "CREATE TABLE IF NOT EXISTS author (id INTEGER PRIMARY KEY AUTOINCREMENT, age INTEGER, name TEXT);"
+    assert Book._get_create_sql() == "CREATE TABLE IF NOT EXISTS book (id INTEGER PRIMARY KEY AUTOINCREMENT, author_id INTEGER, published INTEGER, title TEXT);"
 
     for table in ("author", "book"):
         assert table in db.tables
+
+
+def test_create_table_instances(db, Author):
+    db.create(Author)
+
+    john = Author(name="kamoliddin", age=21)
+
+    assert john.name == "kamoliddin"
+    assert john.age == 21
+    assert john.id is None
 

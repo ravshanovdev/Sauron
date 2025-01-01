@@ -16,11 +16,20 @@ class Database:
 
 
 class Table:
+    def __init__(self, **kwargs):
+        self._data = {
+            "id": None
+
+        }
+
+        for key, value in kwargs.items():
+            self._data[key] = value
+
     @classmethod
     def _get_create_sql(cls):
         CREATE_TABLE_SQL = "CREATE TABLE IF NOT EXISTS {name} ({fields});"
         fields = [
-            "id INTEGER PRIMARY KEY AUTOINCREMENT",
+            "id INTEGER PRIMARY KEY AUTOINCREMENT"
 
         ]
 
@@ -29,12 +38,20 @@ class Table:
                 fields.append(f"{name} {col.sql_type}")
 
             elif isinstance(col, ForeignKey):
-                fields.append(f"{col}_id INTEGER")
+                fields.append(f"{name}_id INTEGER")
 
         fields = ', '.join(fields)
         name = cls.__name__.lower()
 
         return CREATE_TABLE_SQL.format(name=name, fields=fields)
+
+    def __getattribute__(self, attr_name):
+        _data = super().__getattribute__("_data")
+
+        if attr_name in _data:
+            return _data[attr_name]
+
+        return super().__getattribute__(attr_name)
 
 
 class Column:
