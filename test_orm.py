@@ -68,3 +68,20 @@ def test_create_table_instances(db, Author):
     assert john.age == 21
     assert john.id is None
 
+
+def test_db_save(db, Author):
+    db.create(Author)
+
+    kimdur = Author(name="kimdur", age=45)
+
+    db.save(kimdur)
+
+    assert kimdur._get_insert_sql() == (
+        "INSERT INTO author (age, name) VALUES (?, ?);",
+        [45, "kimdur"]
+    )
+
+    assert kimdur.id == 1
+
+
+
