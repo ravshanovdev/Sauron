@@ -20,6 +20,18 @@ class Database:
         self.conn.commit()
         instance._data["id"] = curser.lastrowid
 
+    def all(self, table):
+        sql, fields = table._get_select_all_sql()
+
+        result = []
+        for row in self.conn.execute(sql).fetchall():
+            instance = table()
+            for field, value in zip(fields, row):
+                setattr(instance, field, value)
+                result.append(instance)
+
+        return result
+
 
 class Table:
     def __init__(self, **kwargs):
@@ -82,6 +94,23 @@ class Table:
         sql = INSERT_SQL.format(name=cls.__name__.lower(), fields=fields, placeholders=placeholders)
 
         return sql, values
+
+    @classmethod
+    def _get_select_all_sql(cls):
+        SELECT_ALL_SQL = "SELECT {fields} FROM {name};"
+
+        fields = [
+            "id"
+        ]
+
+        for name, col in inspect.getmembers(cls):
+            if isinstance(col, Column):
+                fields.append(name)
+            elif isinstance(col, ForeignKey):
+                fields.append(f"{name}_id")
+        sql = SELECT_ALL_SQL.format(name=cls.__name__.lower(), fields=", ".join(fields))
+
+        return sql, fields
 
 
 class Column:
