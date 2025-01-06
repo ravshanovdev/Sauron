@@ -28,7 +28,8 @@ class Database:
             instance = table()
             for field, value in zip(fields, row):
                 setattr(instance, field, value)
-                result.append(instance)
+
+            result.append(instance)
 
         return result
 
@@ -99,9 +100,7 @@ class Table:
     def _get_select_all_sql(cls):
         SELECT_ALL_SQL = "SELECT {fields} FROM {name};"
 
-        fields = [
-            "id"
-        ]
+        fields = ["id"]
 
         for name, col in inspect.getmembers(cls):
             if isinstance(col, Column):

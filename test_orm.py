@@ -94,6 +94,7 @@ def test_query_all_authors(db, Author):
     db.save(kimdur)
 
     authors = db.all(Author)
+    print(str(authors))
 
     assert Author._get_select_all_sql() == (
         "SELECT id, age, name FROM author;",
@@ -101,7 +102,7 @@ def test_query_all_authors(db, Author):
 
     )
 
-    assert len(authors) == 6
+    assert len(authors) == 2
     assert isinstance(authors[0], Author)
     assert isinstance(authors[1], Author)
 
