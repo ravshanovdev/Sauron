@@ -1,8 +1,8 @@
 from pylord.app import PyLordApp
 from pylord.middleware import Middleware
-from pylord.orm import Database as db
+# from pylord.orm import Database as db
 app = PyLordApp()
-from tables import Author
+# from tables import Author
 
 
 @app.route("/home", allowed_methods=["get"])
@@ -76,13 +76,13 @@ def json_handler(req, resp):
     resp.json = response_data
 
 
-@app.route("/test")
-def test(req, resp, Author):
-
-    kamol = Author(name="kamoliddin", age=45)
-    kimdur = Author(name="kimdur", age=44)
-
-    print(kamol, kimdur)
+# @app.route("/test")
+# def test(req, resp, Author):
+#
+#     kamol = Author(name="kamoliddin", age=45)
+#     kimdur = Author(name="kimdur", age=44)
+#
+#     print(kamol, kimdur)
 
 
 
