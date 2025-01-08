@@ -33,6 +33,19 @@ class Database:
 
         return result
 
+    def get(self, table, id):
+        sql, fields = table._get_select_by_id_sql(id=id)
+        row = self.conn.execute(sql).fetchone()
+
+        if row is None:
+            raise Exception(f"{table.__name__} instance with {id} does not exist")
+
+        instance = table()
+        for field, value in zip(fields, row):
+            setattr(instance, field, value)
+
+        return instance
+
 
 class Table:
     def __init__(self, **kwargs):
@@ -72,6 +85,7 @@ class Table:
 
         return super().__getattribute__(attr_name)
 
+# overwrite setattr method
     def __setattr__(self, name, value):
         super().__setattr__(name, value)
         if name in self._data:
@@ -116,6 +130,20 @@ class Table:
 
         return sql, fields
 
+    @classmethod
+    def _get_select_by_id_sql(cls, id):
+        SELECT_GET_SQL = "SELECT {fields} FROM {name} WHERE id = {id};"
+        fields = ["id"]
+
+        for name, col in inspect.getmembers(cls):
+            if isinstance(col, Column):
+                fields.append(name)
+            elif isinstance(col, ForeignKey):
+                fields.append(f"{name}_id")
+
+        sql = SELECT_GET_SQL.format(name=cls.__name__.lower(), fields=", ".join(fields), id=id)
+
+        return sql, fields
 
 class Column:
     def __init__(self, column_type):

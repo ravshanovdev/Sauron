@@ -112,4 +112,20 @@ def test_query_all_authors(db, Author):
         assert author.id in {1, 2}
 
 
+def test_get_author(db, Author):
+    db.create(Author)
 
+    kimdur = Author(name="kimdur", age=44)
+    db.save(kimdur)
+
+    kimdur_from_db = db.get(Author, id=1)
+
+    assert Author._get_select_by_id_sql(id=1) == (
+        "SELECT id, age, name FROM author WHERE id = 1;",
+        ['id', "age", 'name']
+    )
+
+    assert isinstance(kimdur_from_db, Author)
+    assert kimdur_from_db.id == 1
+    assert kimdur_from_db.age == 44
+    assert kimdur_from_db.name == "kimdur"
