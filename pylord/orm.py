@@ -72,6 +72,11 @@ class Table:
 
         return super().__getattribute__(attr_name)
 
+    def __setattr__(self, name, value):
+        super().__setattr__(name, value)
+        if name in self._data:
+            self._data[name] = value
+
     def _get_insert_sql(self):
         INSERT_SQL = "INSERT INTO {name} ({fields}) VALUES ({placeholders});"
         cls = self.__class__

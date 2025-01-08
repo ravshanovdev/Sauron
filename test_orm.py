@@ -109,6 +109,7 @@ def test_query_all_authors(db, Author):
     for author in authors:
         assert author.age in {45, 44}
         assert author.name in {"kamoliddin", "kimdur"}
+        assert author.id in {1, 2}
 
 
 
