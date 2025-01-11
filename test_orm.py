@@ -9,6 +9,7 @@ def Author():
     class Author(Table):
         name = Column(str)
         age = Column(int)
+
     return Author
 
 
@@ -27,11 +28,11 @@ def Book(Author):
         title = Column(str)
         published = Column(bool)
         author = ForeignKey(Author)
+
     return Book
 
 
 def test_create_db(db):
-
     assert isinstance(db.conn, sqlite3.Connection)
     assert db.tables == []
 
@@ -48,7 +49,6 @@ def test_table_definition(Author, Book):
 
 
 def test_create_tables(Author, Book, db):
-
     db.create(Author)
     db.create(Book)
 
@@ -129,3 +129,49 @@ def test_get_author(db, Author):
     assert kimdur_from_db.id == 1
     assert kimdur_from_db.age == 44
     assert kimdur_from_db.name == "kimdur"
+
+
+# ishlagani yoq
+def test_to_get_book(db, Book, Author):
+    db.create(Book)
+    db.create(Author)
+
+    kimdur = Author(name="kimdur", age=44)
+    sandur = Author(name="sandur", age=78)
+
+    nimadur = Book(title="utkan kunlar", published=True, author=kimdur)
+    mandur = Book(title="mandur kitobi", published=True, author=sandur)
+
+    db.save(kimdur)
+    db.save(sandur)
+    db.save(nimadur)
+    db.save(mandur)
+
+    book_from_db = db.get(Book, 2)
+
+    assert book_from_db.title == "mandur kitobi"
+    assert book_from_db.author.id == 2
+    assert book_from_db.author.name == "sandur"
+    assert book_from_db.author.age == 78
+
+
+def test_all_book(db, Author, Book):
+    db.create(Book)
+    db.create(Author)
+
+    kimdur = Author(name="kimdur", age=44)
+    sandur = Author(name="sandur", age=78)
+
+    nimadur = Book(title="utkan kunlar", published=True, author=kimdur)
+    mandur = Book(title="mandur kitobi", published=True, author=sandur)
+
+    db.save(kimdur)
+    db.save(sandur)
+    db.save(nimadur)
+    db.save(mandur)
+
+    db_get_all_books = db.all(Book)
+    assert len(db_get_all_books) == 2
+    assert db_get_all_books[1].author_id == 2
+    assert db_get_all_books[1].author.name == "sandur"
+
