@@ -59,6 +59,11 @@ class Database:
         self.conn.execute(sql, values)
         self.conn.commit()
 
+    def delete(self, table, id):
+        sql = table._get_delete_sql(id)
+        self.conn.execute(sql)
+        self.conn.commit()
+
 
 class Table:
     def __init__(self, **kwargs):
@@ -179,6 +184,14 @@ class Table:
         )
 
         return sql, values
+
+    @classmethod
+    def _get_delete_sql(cls, id):
+        DELETE_SQL = "DELETE FROM {name} WHERE id = {id};"
+
+        sql = DELETE_SQL.format(name=cls.__name__.lower(), id=id)
+
+        return sql
 
 
 class Column:

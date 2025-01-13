@@ -193,3 +193,16 @@ def test_update_author(db, Author):
     assert kimdur_from_db.age == 78
 
 
+def test_delete_author(db, Author):
+    db.create(Author)
+
+    kimdur = Author(name="kimdur", age=78)
+    db.save(kimdur)
+
+    db.delete(Author, id=1)
+
+    with pytest.raises(Exception):
+        db.get(Author, id=1)
+
+
+
