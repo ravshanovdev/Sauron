@@ -172,6 +172,24 @@ def test_all_book(db, Author, Book):
 
     db_get_all_books = db.all(Book)
     assert len(db_get_all_books) == 2
-    assert db_get_all_books[1].author_id == 2
+    assert db_get_all_books[1].author.id == 2
     assert db_get_all_books[1].author.name == "sandur"
+
+
+def test_update_author(db, Author):
+    db.create(Author)
+
+    kimdur = Author(name="kimdur", age=45)
+    db.save(kimdur)
+
+    kimdur.name = "sandur"
+    kimdur.age = 78
+
+    db.update(kimdur)
+
+    kimdur_from_db = db.get(Author, id=1)
+
+    assert kimdur_from_db.name == "sandur"
+    assert kimdur_from_db.age == 78
+
 
