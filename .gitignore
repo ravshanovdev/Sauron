@@ -1,3 +1,16 @@
-myvenv/
+# Virtual environment
 venv/
+myvenv/
 .venv/
+
+# Python cache files
+__pycache__/
+*.pyc
+*.pyo
+
+# PyCharm files
+.idea/
+
+# OS-specific files
+.DS_Store
+Thumbs.db
