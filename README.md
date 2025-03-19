@@ -2,7 +2,8 @@
 
 ![purpose](https://img.shields.io/badge/:Purpose-learning-green)
 
-![PyPI - Version](https://img.shields.io/pypi/v/:pylord)
+![PyPI - Version](https://img.shields.io/pypi/v/pylord)
+
 
 
 PyLord is a Python web framework built for learning purpose
@@ -12,7 +13,6 @@ It's a WSGI framework and can be used with any WSGI application server such as G
 
 ```shell
 pip install pylord
-
 ```
 
 ## How to use it 
