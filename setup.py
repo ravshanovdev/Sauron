@@ -14,11 +14,11 @@ from setuptools import find_packages, setup, Command
 # Package meta-data.
 NAME = 'pylord'
 DESCRIPTION = 'Python web framework building for APIs'
-URL = 'https://github.com/me/myproject'
+URL = 'https://github.com/ravshanovdev/Sauron'
 EMAIL = 'kravshanov97@gmail.com'
 AUTHOR = 'Kamoliddin Ravshanov'
 REQUIRES_PYTHON = '>=3.6.0'
-VERSION = '0.1.2'
+VERSION = '0.2.1'
 
 # What packages are required for this module to be executed?
 REQUIRED = [

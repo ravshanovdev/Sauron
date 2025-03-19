@@ -37,6 +37,45 @@ class Database:
 
         return result
 
+    def get_user(self, table, field_name=None, value=None):
+        if field_name is not None and value is not None:
+            sql = table._get_select_by_user_sql(field_name=field_name)
+            params = (value,)
+        else:
+            raise ValueError("Either 'field_name' and 'value' must be provided.")
+
+        row = self.conn.execute(sql, params).fetchone()
+
+        if row is None:
+            return None
+
+        return row[0]
+
+    def get_by_field(self, table, field_name=None, value=None):
+
+        if field_name is not None and value is not None:
+            sql, fields = table._get_select_by_field_sql(field_name=field_name, value=value)
+            params = (value,)
+        else:
+            raise ValueError("Either 'field_name' and 'value' must be provided.")
+
+        row = self.conn.execute(sql, params).fetchone()
+
+        if row is None:
+            raise Exception(f"{table.__name__} instance not found")
+
+        instance = table()
+
+        for field, value in zip(fields, row):
+            if field.endswith("_id"):
+                field = field[:-3]
+                fk = getattr(table, field)
+                value = self.get(fk.table, id=value)
+
+            setattr(instance, field, value)
+
+        return instance
+
     def get(self, table, id):
         sql, fields = table._get_select_by_id_sql(id=id)
         row = self.conn.execute(sql).fetchone()
@@ -103,7 +142,7 @@ class Table:
 
         return super().__getattribute__(attr_name)
 
-# overwrite setattr method
+    # overwrite setattr method
     def __setattr__(self, name, value):
         super().__setattr__(name, value)
         if name in self._data:
@@ -162,6 +201,25 @@ class Table:
         sql = SELECT_GET_SQL.format(name=cls.__name__.lower(), fields=", ".join(fields), id=id)
 
         return sql, fields
+
+    @classmethod
+    def _get_select_by_field_sql(cls, field_name, value):
+        SELECT_GET_SQL_BY_FIELD = "SELECT {fields} FROM {name} WHERE {field_name} = ?;"
+        fields = ["id"]
+
+        for name, col in inspect.getmembers(cls):
+            if isinstance(col, Column):
+                fields.append(name)
+            elif isinstance(col, ForeignKey):
+                fields.append(f"{name}_id")
+
+        sql = SELECT_GET_SQL_BY_FIELD.format(name=cls.__name__.lower(), fields=", ".join(fields), field_name=field_name)
+
+        return sql, fields
+
+    @classmethod
+    def _get_select_by_user_sql(cls, field_name):
+        return f"SELECT id FROM {cls.__name__.lower()} WHERE {field_name} = ?"
 
     def _get_update_sql(self):
         UPDATE_SQL = "UPDATE {name} SET {fields} WHERE id = {id};"

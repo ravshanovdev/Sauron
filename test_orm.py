@@ -205,4 +205,14 @@ def test_delete_author(db, Author):
         db.get(Author, id=1)
 
 
+def test_upgraded_get_function(db, Author):
+    db.create(Author)
 
+    kamoljon = Author(name='kamoljon', age=61)
+    db.save(kamoljon)
+    db.conn.commit()
+
+    authorjonxon = db.get_by_field(Author, "age", 61)
+
+    assert authorjonxon.name == 'kamoljon'
+    assert authorjonxon.age == 61
