@@ -199,17 +199,4 @@ def get_product(req, resp, id):
     resp.json = {"user": product.user.username, "name": product.name, "price": product.price}
 
 
-@app.route("/get_product_user/{id:d}", allowed_methods=['get'])
-def get_product_user(req, resp, id):
-    db = get_db()
-
-    product = db.get(Product, id=id)
-
-    if not product:
-        resp.status_code = 404
-        resp.json = {"error": "Product not found"}
-        return
-
-    product_user = Product
-
 
