@@ -6,7 +6,7 @@
 
 
 
-PyLord is a Python web framework built for learning purpose
+PyLord is a Python web framework built for building APIs
 
 It's a WSGI framework and can be used with any WSGI application server such as Gunicorn/Waitress
 
