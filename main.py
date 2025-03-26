@@ -199,4 +199,18 @@ def get_product(req, resp, id):
     resp.json = {"user": product.user.username, "name": product.name, "price": product.price}
 
 
+@app.route("/get_product_by_name/{name}", allowed_methods=['get'])
+def get_product_by_name(req, resp, name: str):
+    db = get_db()
+
+    product = db.get_by_field(Product, field_name="name", value=name)
+
+    if not product:
+        resp.status_code = 404
+        resp.json = {"product": "Product Not Found"}
+        return
+
+    resp.status_code = 200
+    resp.json = {"user": product.user.username, "name": product.name, "price": product.price}
+
 

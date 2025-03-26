@@ -55,7 +55,7 @@ class Database:
 
         if field_name is not None and value is not None:
             sql, fields = table._get_select_by_field_sql(field_name=field_name, value=value)
-            params = (value,)
+            params = (f"%{value}%",)
         else:
             raise ValueError("Either 'field_name' and 'value' must be provided.")
 
@@ -204,7 +204,8 @@ class Table:
 
     @classmethod
     def _get_select_by_field_sql(cls, field_name, value):
-        SELECT_GET_SQL_BY_FIELD = "SELECT {fields} FROM {name} WHERE {field_name} = ?;"
+        SELECT_GET_SQL_BY_FIELD = "SELECT {fields} FROM {name} WHERE {field_name} LIKE ?;"
+
         fields = ["id"]
 
         for name, col in inspect.getmembers(cls):
