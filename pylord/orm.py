@@ -37,19 +37,18 @@ class Database:
 
         return result
 
-    def get_user(self, table, field_name=None, value=None):
-        if field_name is not None and value is not None:
-            sql = table._get_select_by_user_sql(field_name=field_name)
-            params = (value,)
-        else:
+    def get_user(self, table, field_name=None, value=None, return_fields=None):
+        if field_name is None and value is None:
             raise ValueError("Either 'field_name' and 'value' must be provided.")
 
-        row = self.conn.execute(sql, params).fetchone()
+        sql = table._get_select_by_user_sql(field_name=field_name, return_fields=return_fields)
+        params = (value,)
 
-        if row is None:
-            return None
+        cursor = self.conn.execute(sql, params)
+        row = cursor.fetchone()
+        columns = [desc[0] for desc in cursor.description]
 
-        return row[0]
+        return dict(zip(columns, row))
 
     def get_by_field(self, table, field_name=None, value=None):
 
@@ -219,8 +218,14 @@ class Table:
         return sql, fields
 
     @classmethod
-    def _get_select_by_user_sql(cls, field_name):
-        return f"SELECT id FROM {cls.__name__.lower()} WHERE {field_name} = ?"
+    def _get_select_by_user_sql(cls, field_name, return_fields=None):
+        if return_fields is None:
+            fields_str = "*"
+        else:
+            fields_str = ", ".join(return_fields)
+
+        query = f"SELECT {fields_str} FROM {cls.__name__.lower()} WHERE {field_name} = ?"
+        return query
 
     def _get_update_sql(self):
         UPDATE_SQL = "UPDATE {name} SET {fields} WHERE id = {id};"

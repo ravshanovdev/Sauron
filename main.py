@@ -2,6 +2,7 @@ from pylord.app import PyLordApp
 from pylord.middleware import Middleware
 from pylord.orm import ForeignKey, Table, Column, Database
 import threading
+from helper_file import generate_token
 
 threading_local = threading.local()
 
@@ -152,6 +153,31 @@ def user_register(req, resp):
         "username": username,
         "email": email
     }
+
+
+@app.route("/login", allowed_methods=['post'])
+def login(req, resp):
+    db = get_db()
+
+    data = req.json
+    username = data.get("username")
+    password = data.get("password1")
+
+    if not username or not password:
+        resp.status_code = 400
+        resp.json = {"message": "Username va password kiritish shart!"}
+
+    # user = db.conn.execute("SELECT id, password_hash FROM user WHERE username = ?", (username,)).fetchone()
+    user = db.get_user(User, field_name="username", value=username)
+
+    if not user or not check_password(password, user["password_hash"]):
+        resp.status_code = 401
+        resp.json = {"error": "Noto‘g‘ri username yoki parol!"}
+
+    token = generate_token(user["id"], username=username)
+
+    resp.status_code = 200
+    resp.json = {"token": token}
 
 
 @app.route("/create_product", allowed_methods=['post'])

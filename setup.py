@@ -17,8 +17,8 @@ DESCRIPTION = 'Python web framework building for APIs'
 URL = 'https://github.com/ravshanovdev/Sauron'
 EMAIL = 'kravshanov97@gmail.com'
 AUTHOR = 'Kamoliddin Ravshanov'
-REQUIRES_PYTHON = '>=3.6.0'
-VERSION = '0.2.3'
+REQUIRES_PYTHON = '>=3.9.0'
+VERSION = '0.2.4'
 
 # What packages are required for this module to be executed?
 REQUIRED = [
