@@ -2,7 +2,8 @@
 
 ![purpose](https://img.shields.io/badge/:Purpose-learning-green)
 
-![PyPI - Version](https://img.shields.io/pypi/v/pylord)
+[![PyPI - Version](https://img.shields.io/pypi/v/pylord)](https://pypi.org/project/pylord/)
+
 
 
 
