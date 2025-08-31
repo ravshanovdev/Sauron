@@ -156,6 +156,81 @@ def user_register(req, resp):
         "email": email
     }
 
+``` python 
+
+import jwt
+import datetime
+import secrets
+from functools import wraps
+
+# just for test
+SECRET_KEY = "your_secret_key"
+
+
+def generate_token(user_id, username):
+    payload = {
+        "user_id": user_id,
+        "username": username,
+        "exp": datetime.datetime.utcnow() + datetime.timedelta(days=3)
+    }
+    return jwt.encode(payload, SECRET_KEY, algorithm="HS256")
+
+
+def auth_required(f):
+    @wraps(f)
+    def decorated(req, resp, *args, **kwargs):
+        auth_header = req.headers.get("Authorization")
+
+        def reject(msg):
+            resp.status_code = 401
+            resp.json = {"error": msg}
+            return
+
+        if not auth_header or not auth_header.startswith("Bearer "):
+            return reject("Token Required!")
+
+        try:
+            token = auth_header.split("Bearer ")[1]
+            payload = jwt.decode(token, SECRET_KEY, algorithms=["HS256"])
+            req.user_id = payload.get("user_id")
+            req.username = payload.get("username")
+        except (IndexError, AttributeError):
+            return reject("Incorrect Token!")
+        except jwt.ExpiredSignatureError:
+            return reject("Token Expired!")
+        except jwt.InvalidTokenError:
+            return reject("Invalid Token")
+
+        return f(req, resp, *args, **kwargs)
+
+    return decorated
+
+```
+``` python
+@app.route("/login", allowed_methods=['post'])
+def login(req, resp):
+    db = get_db()
+
+    data = req.json
+    username = data.get("username")
+    password = data.get("password1")
+
+    if not username or not password:
+        resp.status_code = 400
+        resp.json = {"message": "Username va password kiritish shart!"}
+
+    # user = db.conn.execute("SELECT id, password_hash FROM user WHERE username = ?", (username,)).fetchone()
+    user = db.get_user(User, field_name="username", value=username)
+
+    if not user or not check_password(password, user["password_hash"]):
+        resp.status_code = 401
+        resp.json = {"error": "Noto‘g‘ri username yoki parol!"}
+
+    token = generate_token(user["id"], username=username)
+
+    resp.status_code = 200
+    resp.json = {"token": token}
+    
 
 @app.route("/create_product", allowed_methods=['post'])
 def create_product(req, resp):
