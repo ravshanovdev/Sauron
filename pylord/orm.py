@@ -228,7 +228,6 @@ class Table:
         return query
 
     def _get_update_sql(self):
-        UPDATE_SQL = "UPDATE {name} SET {fields} WHERE id = {id};"
         fields = []
         values = []
 
@@ -237,15 +236,12 @@ class Table:
                 fields.append(name)
                 values.append(getattr(self, name))
             elif isinstance(col, ForeignKey):
+                fk = getattr(self, name)
                 fields.append(f"{name}_id")
-                values.append(getattr(self, name).id)
+                values.append(fk.id if fk else None)
 
-        sql = UPDATE_SQL.format(
-            name=self.__class__.__name__.lower(),
-            fields=", ".join([f"{field} = ?" for field in fields]),
-            id=self.id
-
-        )
+        sql = f"UPDATE {self.__class__.__name__.lower()} SET {', '.join([f'{field} = ?' for field in fields])} WHERE id = ?;"
+        values.append(self.id)
 
         return sql, values
 
