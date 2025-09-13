@@ -18,7 +18,7 @@ pip install pylord
 
 ## How to use it 
 
-### Basic Usage
+### Basic Usage For WSGI version
 
 ```python
 import threading
@@ -205,80 +205,94 @@ def auth_required(f):
         return f(req, resp, *args, **kwargs)
 
     return decorated
-
 ```
+
+### Basic Usage For ASGI version (This mode is currently in testing mode.)
+
 ``` python
-@app.route("/login", allowed_methods=['post'])
-def login(req, resp):
+
+from pylord.asgi import PyLordASGI
+from pylord.orm import ForeignKey, Table, Column, Database
+from main import get_db
+
+app = PyLordASGI()
+
+
+@app.route("/", methods=["get"])
+async def get_hello(request):
+    return {"message": "hello"}
+
+
+class TestModel(Table):
+    name = Column(str)
+    text = Column(str)
+
+
+@app.route("/create_model", methods=['post'])
+async def create_test(request, response):
     db = get_db()
-
-    data = req.json
-    username = data.get("username")
-    password = data.get("password1")
-
-    if not username or not password:
-        resp.status_code = 400
-        resp.json = {"message": "Username va password kiritish shart!"}
-
-    # user = db.conn.execute("SELECT id, password_hash FROM user WHERE username = ?", (username,)).fetchone()
-    user = db.get_user(User, field_name="username", value=username)
-
-    if not user or not check_password(password, user["password_hash"]):
-        resp.status_code = 401
-        resp.json = {"error": "Noto‘g‘ri username yoki parol!"}
-
-    token = generate_token(user["id"], username=username)
-
-    resp.status_code = 200
-    resp.json = {"token": token}
-    
-
-@app.route("/create_product", allowed_methods=['post'])
-def create_product(req, resp):
-    db = get_db()
-    db.create(Product)
-    data = req.json
+    db.create(TestModel)
 
     try:
+        data = await request.json()
+    except Exception:
+        return {"error": "Invalid or empty JSON body"}
 
-        user = db.get(User, data['user'])
-        if not user:
-            resp.status_code = 404
-            resp.json = {"error": "User not found"}
-            return
+    model = TestModel(name=data['name'], text=data['text'])
+    db.save(model)
+    # return {"id": model.id, "name": model.name, "text": model.text}
 
-        product = Product(
-            user=user,
-            name=data["name"],
-            price=data['price']
-        )
-
-        db.save(product)
-
-        resp.status_code = 201
-        resp.json = {"id": product.id, "user": user.username, "name": product.name, "price": product.price}
-
-    except Exception as e:
-        resp.status_code = 500
-        resp.json = {"error": str(e)}
+    response.status_code = 201
+    response.json = {"id": model.id, "name": model.name, "text": model.text}
 
 
-@app.route("/get_product/{id:d}", allowed_methods=['get'])
-def get_product(req, resp, id):
+@app.route("/get_all_test_models", methods=['get'])
+async def get_test(request, response):
     db = get_db()
 
-    product = db.get(Product, id=id)
+    tests = db.all(TestModel)
 
-    if not product:
+    response.status_code = 200
+    response.json = [{"id": test.id, "name": test.name, "text": test.text} for test in tests]
+
+
+@app.route("/delete/{id:d}", methods=['delete'])
+async def delete_test(request, response, id):
+    db = get_db()
+
+    db.delete(TestModel, id=id)
+
+    response.status_code = 200
+    response.json = {"message": "test model successfully deleted"}
+
+
+@app.route('/update_test/{id:d}', methods=['patch'])
+async def update_test(req, resp, id):
+    print(id)
+
+    db = get_db()
+    data = await req.json()
+
+    try:
+        test = db.get(TestModel, id=id)
+
+    except Exception as e:
         resp.status_code = 404
-        resp.json = {"error": "Product not found"}
+        resp.json = {"message": "test not found."}
         return
 
-    resp.status_code = 200
-    resp.json = {"user": product.user.username, "name": product.name, "price": product.price}
+    test.name = data['name']
+    test.text = data['text']
 
+    db.update(test)
+
+    resp.status_code = 200
+    resp.json = {"message": "test model updated.!"}
+
+# app.add_route('/update_test/{id:d}', update_test, methods=['patch'])
 
 ```
+
 
 
 ### Unit Tests
